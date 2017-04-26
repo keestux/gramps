@@ -59,6 +59,7 @@ from gramps.gen.lib import (Address, Attribute, AttributeType, ChildRef, Citatio
 from gramps.gen.utils.id import create_id
 from gramps.gen.updatecallback import UpdateCallback
 from gramps.gen.utils.libformatting import ImportInfo
+from gramps.gen.errors import HandleError
 
 class ProgenError(Exception):
     """
@@ -1777,7 +1778,7 @@ class ProgenParser(UpdateCallback):
             # Update at the begin
             self.update()
 
-            ind_id = i +1
+            ind_id = i + 1
             # print(("Person ID %d  " % ind_id) + " ".join(("%s" % r) for r in rec))
 
             father = rec[person_F13]   # F13: Father
@@ -1803,19 +1804,27 @@ class ProgenParser(UpdateCallback):
 
                         if father_handle:
                             family.set_father_handle(father_handle)
-                            father_person = self.dbase.get_person_from_handle \
-                                (father_handle)
-                            father_person.add_family_handle(family.get_handle())
-                            # commit the Father
-                            self.dbase.commit_person(father_person, self.trans)
+                            try:
+                                father_person = self.dbase.get_person_from_handle \
+                                    (father_handle)
+                                father_person.add_family_handle(family.get_handle())
+                                # commit the Father
+                                self.dbase.commit_person(father_person, self.trans)
+                            except HandleError:
+                                LOG.warning("Failed to add father {} to child {}".format(father, ind_id))
+                                pass
 
                         if mother_handle:
                             family.set_mother_handle(mother_handle)
-                            mother_person = self.dbase.get_person_from_handle \
-                                (mother_handle)
-                            mother_person.add_family_handle(family.get_handle())
-                            # commit the Mother
-                            self.dbase.commit_person(mother_person, self.trans)
+                            try:
+                                mother_person = self.dbase.get_person_from_handle \
+                                    (mother_handle)
+                                mother_person.add_family_handle(family.get_handle())
+                                # commit the Mother
+                                self.dbase.commit_person(mother_person, self.trans)
+                            except HandleError:
+                                LOG.warning("Failed to add mother {} to child {}".format(mother, ind_id))
+                                pass
 
                 if family:
                     childref = ChildRef()
@@ -1825,8 +1834,11 @@ class ProgenParser(UpdateCallback):
                         # commit the Family
                         self.dbase.commit_family(family, self.trans)
 
-                    person = self.dbase.get_person_from_handle(person_handle)
-                    if person:
-                        person.add_parent_family_handle(family.get_handle())
-                        # commit the Child
-                        self.dbase.commit_person(person, self.trans)
+                    try:
+                        person = self.dbase.get_person_from_handle(person_handle)
+                        if person:
+                            person.add_parent_family_handle(family.get_handle())
+                            # commit the Child
+                            self.dbase.commit_person(person, self.trans)
+                    except HandleError:
+                        LOG.warning("Failed to add child {} to family".format(ind_id))
