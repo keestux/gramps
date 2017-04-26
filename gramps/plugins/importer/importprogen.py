@@ -569,7 +569,7 @@ class ProgenParser(UpdateCallback):
         self.opt_death_time = False   # Death time in description
         self.opt_death_info2cause = True   # Death info to Death cause
 
-        # Miscalaneous
+        # Miscellaneous
         self.trans = None   # Transaction identifier
         self.def_ = None   # PG30 definitions
         self.high_fam_id = -1
@@ -1147,7 +1147,7 @@ class ProgenParser(UpdateCallback):
 
             first_name = recflds[person_ix[3]]   # F03:
             if first_name:
-                # replace if neccessary separators with ' '
+                # replace if necessary separators with ' '
                 first_name = re.sub(r'[,;]', ' ', first_name)
             else:
                 # default first name 'Nomen nominandum'
