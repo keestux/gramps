@@ -215,7 +215,8 @@ def _get_mem_text(mems, i):
     """Normalize text."""
     # Notice that Pro-Gen starts the mem numbering at 1.
     if i <= 0:
-        return
+        # MEM index 0, just return an empty string
+        return ""
 
     i -= 1
     recno = mems[i][0] - 1
