@@ -1131,15 +1131,17 @@ class ProgenParser(UpdateCallback):
             # Update at the begin due to approx. ton's of 'not recflds[1]'
             self.update()
 
-            recflds = table.convert_record_to_list(rec, self.mems)
-            if not recflds[1]:
-                continue
-
             # Option: Original Individuals IDs
             if self.opt_orig_ind_id:
                 ind_id = i + 1
             else:
                 ind_id += 1
+
+            recflds = table.convert_record_to_list(rec, self.mems)
+            # Skip if "Change Date" is not present?
+            if not recflds[1]:
+                LOG.warning("Person {} with empty Change Date??".format(ind_id))
+                # continue
 
             # print(("Ind ID %d " % ind_id) + " ".join(("%s" % r) for r in rec))
             person = self.__find_or_create_person(ind_id)
