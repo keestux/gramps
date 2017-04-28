@@ -563,9 +563,9 @@ class ProgenParser(UpdateCallback):
         self.skeys = {}   # Caching source handles
         self.ckeys = {}   # Caching citation handles
 
-        # Additonal options to for data import
-        self.opt_ind_id = -1   # Individual ID start (-1 keeps Original IDs)
-        self.opt_fam_id = -1   # Family ID start (-1 keeps Original IDs)
+        # Additional options to for data import
+        self.opt_orig_ind_id = True     # Use original Individual ID
+        self.opt_orig_fam_id = True     # Use original Family ID
         self.opt_relation_code = 0   # Relation code contains one/two letters
         self.opt_birth_time = False   # Birth time in description
         self.opt_death_time = False   # Death time in description
@@ -1126,7 +1126,7 @@ class ProgenParser(UpdateCallback):
         male_sym = self.def_.tables['Genealogical'].parms['male']
         female_sym = self.def_.tables['Genealogical'].parms['female']
 
-        ind_id = self.opt_ind_id -1   # Option: Individuals IDs interator
+        ind_id = 0
         for i, rec in enumerate(self.pers):
             # Update at the begin due to approx. ton's of 'not recflds[1]'
             self.update()
@@ -1135,10 +1135,11 @@ class ProgenParser(UpdateCallback):
             if not recflds[1]:
                 continue
 
-            ind_id += 1
             # Option: Original Individuals IDs
-            if self.opt_ind_id < 0:
-                ind_id = i +1
+            if self.opt_orig_ind_id:
+                ind_id = i + 1
+            else:
+                ind_id += 1
 
             # print(("Ind ID %d " % ind_id) + " ".join(("%s" % r) for r in rec))
             person = self.__find_or_create_person(ind_id)
@@ -1509,7 +1510,7 @@ class ProgenParser(UpdateCallback):
 
         # The records are numbered 1..N
         # self.set_text(_('Importing families'))  # non-functional for now
-        fam_id = self.opt_fam_id -1   # Option: Family IDs interator
+        fam_id = 0
         for i, rec in enumerate(self.rels):
             # Update at the begin
             self.update()
@@ -1518,10 +1519,11 @@ class ProgenParser(UpdateCallback):
             wife = rec[family_ix[4]]   # F04: FAM WIFE
 
             if husband > 0 or wife > 0:
-                fam_id += 1
                 # Option: Original family IDs
-                if self.opt_fam_id < 0:
-                    fam_id = i +1
+                if self.opt_orig_fam_id:
+                    fam_id = i + 1
+                else:
+                    fam_id += 1
                 # print(("Family ID %d  " % fam_id) + " ".join(("%s" % r) for r in rec))
 
                 recflds = table.convert_record_to_list(rec, self.mems)
